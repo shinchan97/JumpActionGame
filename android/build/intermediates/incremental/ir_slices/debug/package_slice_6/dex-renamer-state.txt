@@ -1,0 +1,4 @@
+#Fri May 17 19:38:19 PDT 2019
+base.0=/Users/arataueno1997/Desktop/JumpActionGame/android/build/intermediates/transforms/dexMerger/debug/6
+path.0=classes.dex
+renamed.0=classes.dex
