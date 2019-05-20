@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont //追加する
 import com.badlogic.gdx.Preferences //追加する
 import com.badlogic.gdx.graphics.OrthographicCamera
 import java.util.*
+import kotlin.collections.ArrayList
 
 class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
     companion object {
@@ -40,6 +41,7 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
     private var mRandom: Random
     private var mSteps: ArrayList<Step>
     private var mStars: ArrayList<Star>
+    private var mEnemy: ArrayList<Enemy>
     private lateinit var mUfo: Ufo
     private lateinit var mPlayer: Player
 
@@ -73,6 +75,7 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         mRandom = Random()
         mSteps = ArrayList<Step>()
         mStars = ArrayList<Star>()
+        mEnemy = ArrayList<Enemy>()
         mGameState = GAME_STATE_READY
         mTouchPoint = Vector3() // ←追加する
 
@@ -82,7 +85,7 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         mHighScore = 0  // ←追加する
 
         // ハイスコアをPreferencesから取得する
-        mPrefs = Gdx.app.getPreferences("jp.techacademy.taro.kirameki.jumpactiongame") // ←追加する
+        mPrefs = Gdx.app.getPreferences("shinchan.jumpactiongame") // ←追加する
         mHighScore = mPrefs.getInteger("HIGHSCORE", 0) // ←追加する
 
 
@@ -122,6 +125,11 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
             mStars[i].draw(mGame.batch)
         }
 
+        // Enemy
+        for (i in 0 until mEnemy.size) {
+            mEnemy[i].draw(mGame.batch)
+        }
+
         // UFO
         mUfo.draw(mGame.batch)
 
@@ -152,9 +160,11 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         val starTexture = Texture("star.png")
         val playerTexture = Texture("uma.png")
         val ufoTexture = Texture("ufo.png")
+        val enemyTexture = Texture("monster.png")
 
         // StepとStarをゴールの高さまで配置していく
         var y = 0f
+        var y_enemy = 0f
 
         val maxJumpHeight = Player.PLAYER_JUMP_VELOCITY * Player.PLAYER_JUMP_VELOCITY / (2 * -GRAVITY)
         while (y < WORLD_HEIGHT - 5) {
@@ -165,11 +175,18 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
             step.setPosition(x, y)
             mSteps.add(step)
 
-            if (mRandom.nextFloat() > 0.6f) {
+            if (mRandom.nextFloat() > 0f) {
                 val star = Star(starTexture, 0, 0, 72, 72)
                 star.setPosition(step.x + mRandom.nextFloat(), step.y + Star.STAR_HEIGHT + mRandom.nextFloat() * 3)
                 mStars.add(star)
+
             }
+            if (mRandom.nextFloat() > 0.75f){
+                val enemy = Enemy(enemyTexture, 0 ,0,72,72)
+                enemy.setPosition(step.x +mRandom.nextFloat(), step.y + Enemy.ENEMY_HEIGHT + mRandom.nextFloat() *3)
+                mEnemy.add(enemy)
+            }
+
 
             y += (maxJumpHeight - 0.5f)
             y -= mRandom.nextFloat() * (maxJumpHeight / 3)
@@ -247,6 +264,16 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
             mGameState = GAME_STATE_GAMEOVER
             return
         }
+
+        //ENEMY(monster)との当たり判定
+        for (i in 0 until mEnemy.size) {
+            val enemy = mEnemy[i]
+            if (mPlayer.boundingRectangle.overlaps(enemy.boundingRectangle)){
+                mGameState = GAME_STATE_GAMEOVER
+                return
+            }
+        }
+
 
         // Starとの当たり判定
         for (i in 0 until mStars.size) {
