@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle  // ←追加する
 import com.badlogic.gdx.math.Vector3    // ←追加する
 import com.badlogic.gdx.graphics.g2d.BitmapFont //追加する
 import com.badlogic.gdx.Preferences //追加する
+import com.badlogic.gdx.audio.Sound //added
 import com.badlogic.gdx.graphics.OrthographicCamera
 import java.util.*
 import kotlin.collections.ArrayList
@@ -30,6 +31,8 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
 
         // 重力
         val GRAVITY = -12
+
+
     }
 
     private val mBg: Sprite
@@ -37,6 +40,7 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
     private val mGuiCamera: OrthographicCamera  // ←追加する
     private val mViewPort: FitViewport
     private val mGuiViewPort: FitViewport   // ←追加する
+    private val mSound: Sound // added
 
     private var mRandom: Random
     private var mSteps: ArrayList<Step>
@@ -87,6 +91,9 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         // ハイスコアをPreferencesから取得する
         mPrefs = Gdx.app.getPreferences("shinchan.jumpactiongame") // ←追加する
         mHighScore = mPrefs.getInteger("HIGHSCORE", 0) // ←追加する
+
+        // sound effectを定義する
+        mSound = Gdx.audio.newSound(Gdx.files.internal("game_explosion5.mp3"))
 
 
         createStage()
@@ -161,10 +168,11 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         val playerTexture = Texture("uma.png")
         val ufoTexture = Texture("ufo.png")
         val enemyTexture = Texture("monster.png")
+        val explodeTexture = Texture("explode.png")
 
         // StepとStarをゴールの高さまで配置していく
         var y = 0f
-        var y_enemy = 0f
+
 
         val maxJumpHeight = Player.PLAYER_JUMP_VELOCITY * Player.PLAYER_JUMP_VELOCITY / (2 * -GRAVITY)
         while (y < WORLD_HEIGHT - 5) {
@@ -193,8 +201,14 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         }
 
         // Playerを配置
-        mPlayer = Player(playerTexture, 0, 0, 72, 72)
-        mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
+        if (mGameState == GAME_STATE_READY || mGameState == GAME_STATE_PLAYING){
+            mPlayer = Player(playerTexture, 0, 0, 72, 72)
+            mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
+        } else if (mGameState == GAME_STATE_GAMEOVER){
+            mPlayer = Player(explodeTexture, 0, 0, 72, 72)
+        }
+//        mPlayer = Player(playerTexture, 0, 0, 72, 72)
+//        mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
 
         // ゴールのUFOを配置
         mUfo = Ufo(ufoTexture, 0, 0, 120, 74)
@@ -255,7 +269,9 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
     private fun updateGameOver() {
         if (Gdx.input.justTouched()){
             mGame.screen = ResultScreen(mGame, mScore)
+//            mSound.play(1.0f)
         }
+
     }
 
     private fun checkCollision() {
@@ -269,6 +285,8 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         for (i in 0 until mEnemy.size) {
             val enemy = mEnemy[i]
             if (mPlayer.boundingRectangle.overlaps(enemy.boundingRectangle)){
+                mSound.play(1.0f) // sound effect
+                //mPlayer = Player(explodeTexture, 0, 0, 72, 72) //プレイヤーを爆発のpngに変更
                 mGameState = GAME_STATE_GAMEOVER
                 return
             }
