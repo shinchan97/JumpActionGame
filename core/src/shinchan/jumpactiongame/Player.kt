@@ -61,5 +61,7 @@ class Player(texture: Texture, srcX: Int, srcY: Int, srcWidth: Int, srcHeight: I
         mState = PLAYER_STATE_JUMP
     }
 
+
+
 }
 

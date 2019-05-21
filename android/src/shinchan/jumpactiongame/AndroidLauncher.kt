@@ -43,7 +43,7 @@ class AndroidLauncher : AndroidApplication(), ActivityRequestHandler {
         val adRequest = AdRequest.Builder().build()
         mAdView.loadAd(adRequest)
 
-        //レイアウト
+        //レイアウト -> libgdxにはlayout fileが無い？
         val layout = RelativeLayout(this)
         layout.addView(gameView,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -56,7 +56,8 @@ class AndroidLauncher : AndroidApplication(), ActivityRequestHandler {
         layout.addView(mAdView, params)
 
         setContentView(layout)
-        showAds(false)
+        showAds(false) //これがなぜ高速化させるのか
+
     }
 
     override fun showAds(show: Boolean) {
