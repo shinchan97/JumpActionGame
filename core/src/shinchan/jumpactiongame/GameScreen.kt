@@ -48,6 +48,7 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
     private var mEnemy: ArrayList<Enemy>
     private lateinit var mUfo: Ufo
     private lateinit var mPlayer: Player
+    private lateinit var mPlayer_end: Player
 
     private var mGameState: Int
     private var mHeightSoFar: Float = 0f    // ←追加する
@@ -141,7 +142,11 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         mUfo.draw(mGame.batch)
 
         //Player
-        mPlayer.draw(mGame.batch)
+        if (mGameState == GAME_STATE_GAMEOVER) {
+            mPlayer_end.draw(mGame.batch)
+        } else {
+            mPlayer.draw(mGame.batch)
+        }
 
         mGame.batch.end()
 
@@ -201,14 +206,15 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
         }
 
         // Playerを配置
-        if (mGameState == GAME_STATE_READY || mGameState == GAME_STATE_PLAYING){
-            mPlayer = Player(playerTexture, 0, 0, 72, 72)
-            mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
-        } else if (mGameState == GAME_STATE_GAMEOVER){
-            mPlayer = Player(explodeTexture, 0, 0, 72, 72)
-        }
-//        mPlayer = Player(playerTexture, 0, 0, 72, 72)
-//        mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
+//        if (mGameState == GAME_STATE_READY || mGameState == GAME_STATE_PLAYING){
+//            mPlayer = Player(playerTexture, 0, 0, 72, 72)
+//            mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
+//        } else if (mGameState == GAME_STATE_GAMEOVER){
+//            mPlayer = Player(explodeTexture, 0, 0, 72, 72)
+//        }
+        mPlayer = Player(playerTexture, 0, 0, 72, 72)
+        mPlayer_end = Player(explodeTexture, 0, 0, 72, 72)
+        mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
 
         // ゴールのUFOを配置
         mUfo = Ufo(ufoTexture, 0, 0, 120, 74)
@@ -286,7 +292,6 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
             val enemy = mEnemy[i]
             if (mPlayer.boundingRectangle.overlaps(enemy.boundingRectangle)){
                 mSound.play(1.0f) // sound effect
-                //mPlayer = Player(explodeTexture, 0, 0, 72, 72) //プレイヤーを爆発のpngに変更
                 mGameState = GAME_STATE_GAMEOVER
                 return
             }
