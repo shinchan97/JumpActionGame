@@ -143,10 +143,12 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
 
         //Player
         if (mGameState == GAME_STATE_GAMEOVER) {
+            mPlayer_end.setPosition(mPlayer.x, mPlayer.y)
             mPlayer_end.draw(mGame.batch)
         } else {
             mPlayer.draw(mGame.batch)
         }
+        //mPlayer.draw(mGame.batch)
 
         mGame.batch.end()
 
@@ -213,8 +215,11 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
 //            mPlayer = Player(explodeTexture, 0, 0, 72, 72)
 //        }
         mPlayer = Player(playerTexture, 0, 0, 72, 72)
-        mPlayer_end = Player(explodeTexture, 0, 0, 72, 72)
         mPlayer.setPosition(WORLD_WIDTH / 2 - mPlayer.width / 2, Step.STEP_HEIGHT)
+
+        mPlayer_end = Player(explodeTexture, 0, 0, 72, 72)
+        mPlayer_end.setPosition(mPlayer.x, mPlayer.y)
+
 
         // ゴールのUFOを配置
         mUfo = Ufo(ufoTexture, 0, 0, 120, 74)
@@ -275,11 +280,9 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
     private fun updateGameOver() {
         if (Gdx.input.justTouched()){
             mGame.screen = ResultScreen(mGame, mScore)
-//            mSound.play(1.0f)
         }
 
     }
-
     private fun checkCollision() {
         // UFO(ゴールとの当たり判定)
         if (mPlayer.boundingRectangle.overlaps(mUfo.boundingRectangle)) {
@@ -292,11 +295,11 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
             val enemy = mEnemy[i]
             if (mPlayer.boundingRectangle.overlaps(enemy.boundingRectangle)){
                 mSound.play(1.0f) // sound effect
+
                 mGameState = GAME_STATE_GAMEOVER
                 return
             }
         }
-
 
         // Starとの当たり判定
         for (i in 0 until mStars.size) {
@@ -347,6 +350,7 @@ class GameScreen(private val mGame: JumpActionGame) : ScreenAdapter() {
     private fun checkGameOver() {
         if (mHeightSoFar - CAMERA_HEIGHT / 2 > mPlayer.y) {
             Gdx.app.log("JampActionGame", "GAMEOVER")
+            mSound.play(1.0f) // sound effect
             mGameState = GAME_STATE_GAMEOVER
         }
     }
